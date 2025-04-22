@@ -19,6 +19,14 @@ const char *COLORS[] = {
     "\033[0m"   // Reset
 };
 
+int numeric_filename_comparator(const void *a, const void *b) {
+    const char *file_a = *(const char **)a;
+    const char *file_b = *(const char **)b;
+    int num_a = atoi(file_a);
+    int num_b = atoi(file_b);
+    return num_a - num_b;
+}
+
 void load_frames() {
     struct dirent *entry;
     DIR *dp = opendir(FRAMES_PATH);
@@ -49,7 +57,7 @@ void load_frames() {
     }
     closedir(dp);
 
-    qsort(file_names, file_count, sizeof(char *), (int (*)(const void *, const void *))strcmp);
+    qsort(file_names, file_count, sizeof(char *), numeric_filename_comparator);
 
     for (int i = 0; i < file_count; i++) {
         char filepath[256];

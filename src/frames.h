@@ -8,7 +8,7 @@
 #define MAX_FRAMES 100
 #define MAX_FRAME_SIZE 1024
 #define COLORS_COUNT 7
-#define FRAME_DELAY 100000
+#define FRAME_DELAY 70000
 
 extern const char *COLORS[COLORS_COUNT];
 extern const char *COLORS[];
