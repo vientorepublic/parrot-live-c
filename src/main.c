@@ -4,49 +4,47 @@
 #include <time.h>
 #include "frames.h"
 
-#define FRAME_INTERVAL 70
+char **allocate_frames() {
+    char **frames = malloc(MAX_FRAMES * sizeof(char *));
+    if (frames == NULL) {
+        fprintf(stderr, "Error: Failed to allocate memory for frames.\n");
+    }
+    return frames;
+}
+
+void free_frames(char **frames, int count) {
+    if (frames != NULL) {
+        for (int i = 0; i < count; i++) {
+            if (frames[i] != NULL) {
+                free(frames[i]);
+            }
+        }
+        free(frames);
+    }
+}
+
+int handle_error(const char *message, char **frames1, char **frames2) {
+    fprintf(stderr, "%s\n", message);
+    free_frames(frames1, frame_count);
+    free_frames(frames2, frame_count);
+    return EXIT_FAILURE;
+}
 
 int main(int argc, char *argv[]) {
     srand(time(NULL));
 
-    int flip = 0;
-    if (argc > 1 && strcmp(argv[1], "flip") == 0) {
-        flip = 1;
-    }
-
-    original_frames = NULL;
-    flipped_frames = NULL;
-
-    original_frames = malloc(MAX_FRAMES * sizeof(char *));
-    flipped_frames = malloc(MAX_FRAMES * sizeof(char *));
-    if (original_frames == NULL || flipped_frames == NULL) {
-        fprintf(stderr, "Error: Failed to allocate memory for frames.\n");
-        return EXIT_FAILURE;
-    }
+    int flip = (argc > 1 && strcmp(argv[1], "flip") == 0) ? 1 : 0;
 
     load_frames();
 
-    if (original_frames == NULL || flipped_frames == NULL || frame_count == 0) {
-        fprintf(stderr, "Error: Failed to load frames.\n");
-        free(original_frames);
-        free(flipped_frames);
-        return EXIT_FAILURE;
+    if (get_original_frames() == NULL || get_flipped_frames() == NULL || get_frame_count() == 0) {
+        return handle_error("Error: Failed to load frames.", get_original_frames(), get_flipped_frames());
     }
 
     stream_frames(flip);
 
-    if (original_frames != NULL && flipped_frames != NULL) {
-        for (int i = 0; i < frame_count; i++) {
-            if (original_frames[i] != NULL) {
-                free(original_frames[i]);
-            }
-            if (flipped_frames[i] != NULL) {
-                free(flipped_frames[i]);
-            }
-        }
-        free(original_frames);
-        free(flipped_frames);
-    }
+    free_frames(get_original_frames(), get_frame_count());
+    free_frames(get_flipped_frames(), get_frame_count());
 
     return 0;
 }

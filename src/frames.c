@@ -5,11 +5,9 @@
 #include <unistd.h>
 #include "frames.h"
 
-char **original_frames = NULL;
-char **flipped_frames = NULL;
-int frame_count = 0;
-
-#define FRAMES_PATH "frames"
+static char **original_frames = NULL;
+static char **flipped_frames = NULL;
+static int frame_count = 0;
 
 const char *COLORS[] = {
     "\033[31m", // Red
@@ -83,6 +81,18 @@ void load_frames() {
         }
         free(file_names[i]);
     }
+}
+
+char **get_original_frames() {
+    return original_frames;
+}
+
+char **get_flipped_frames() {
+    return flipped_frames;
+}
+
+int get_frame_count() {
+    return frame_count;
 }
 
 int select_color(int previous_color) {

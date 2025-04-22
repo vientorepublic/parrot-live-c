@@ -3,6 +3,8 @@
 
 #include <stddef.h>
 
+#define FRAMES_PATH "frames"
+
 #define MAX_FRAMES 100
 #define MAX_FRAME_SIZE 1024
 #define COLORS_COUNT 7
@@ -10,12 +12,16 @@
 
 extern const char *COLORS[COLORS_COUNT];
 extern const char *COLORS[];
-extern char **original_frames;
-extern char **flipped_frames;
-extern int frame_count;
+static char **original_frames;
+static char **flipped_frames;
+static int frame_count;
 
 void load_frames();
 int select_color(int previous_color);
 void stream_frames(int flip);
+
+char **get_original_frames();
+char **get_flipped_frames();
+int get_frame_count();
 
 #endif // FRAMES_H
