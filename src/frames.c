@@ -108,7 +108,7 @@ void stream_frames(int flip) {
     int last_color = -1;
 
     while (1) {
-        printf("\033[2J\033[H");
+        printf("\033[2J\033[3J\033[H");
         int new_color = select_color(last_color);
         printf("%s%s\033[0m", COLORS[new_color], flip ? flipped_frames[index] : original_frames[index]);
         fflush(stdout);
