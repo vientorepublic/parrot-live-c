@@ -1,4 +1,4 @@
-# parrot.live C version
+# Party Parrot
 
 [원본 Typescript 프로젝트](https://github.com/vientorepublic/parrot.live)를 기반으로 재작성된 [parrot.live](https://github.com/hugomd/parrot.live) C언어 버전
 
