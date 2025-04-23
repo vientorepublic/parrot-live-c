@@ -19,13 +19,13 @@ make
 - 정방향으로 실행
 
 ```
-./parrot-live
+./partyparrot
 ```
 
 - 프레임 방향 뒤집기
 
 ```
-./parrot-live flip
+./partyparrot flip
 ```
 
 ## 라이선스
