@@ -3,8 +3,7 @@
 
 #include <stddef.h>
 
-#define FRAMES_PATH "frames"
-
+#define FRAME_COUNT 10
 #define MAX_FRAMES 100
 #define MAX_FRAME_SIZE 1024
 #define COLORS_COUNT 7

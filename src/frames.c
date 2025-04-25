@@ -4,10 +4,10 @@
 #include <dirent.h>
 #include <unistd.h>
 #include "frames.h"
+#include "parrot_frames.h"
 
 static char **original_frames = NULL;
 static char **flipped_frames = NULL;
-static int frame_count = 0;
 
 const char *COLORS[] = {
     "\033[31m", // Red
@@ -28,77 +28,47 @@ int numeric_filename_comparator(const void *a, const void *b) {
 }
 
 void load_frames(int flip) {
-    struct dirent *entry;
-    DIR *dp = opendir(FRAMES_PATH);
-    if (dp == NULL) {
-        perror("Error opening frames directory");
-        return;
-    }
-
-    original_frames = malloc(MAX_FRAMES * sizeof(char *));
-    if (original_frames == NULL) {
-        perror("Error allocating memory for original frame pointers");
-        closedir(dp);
-        return;
-    }
-
-    if (flip) {
-        flipped_frames = malloc(MAX_FRAMES * sizeof(char *));
-        if (flipped_frames == NULL) {
-            perror("Error allocating memory for flipped frame pointers");
-            free(original_frames);
-            closedir(dp);
-            return;
+    if (original_frames) {
+        for (int i = 0; i < FRAME_COUNT; i++) {
+            free(original_frames[i]);
         }
+        free(original_frames);
+    }
+    if (flipped_frames) {
+        for (int i = 0; i < FRAME_COUNT; i++) {
+            free(flipped_frames[i]);
+        }
+        free(flipped_frames);
     }
 
-    char *file_names[MAX_FRAMES];
-    int file_count = 0;
-    while ((entry = readdir(dp)) != NULL) {
-        if (entry->d_type == DT_REG && file_count < MAX_FRAMES) {
-            file_names[file_count] = strdup(entry->d_name);
-            if (file_names[file_count] == NULL) {
-                perror("Error duplicating file name");
-                continue;
+    original_frames = malloc(FRAME_COUNT * sizeof(char *));
+    flipped_frames = malloc(FRAME_COUNT * sizeof(char *));
+
+    unsigned char *frames[] = {
+        frames_0_txt, frames_1_txt, frames_2_txt, frames_3_txt, frames_4_txt,
+        frames_5_txt, frames_6_txt, frames_7_txt, frames_8_txt, frames_9_txt
+    };
+    size_t frame_sizes[] = {
+        sizeof(frames_0_txt), sizeof(frames_1_txt), sizeof(frames_2_txt),
+        sizeof(frames_3_txt), sizeof(frames_4_txt), sizeof(frames_5_txt),
+        sizeof(frames_6_txt), sizeof(frames_7_txt), sizeof(frames_8_txt),
+        sizeof(frames_9_txt)
+    };
+
+    for (int i = 0; i < FRAME_COUNT; i++) {
+        original_frames[i] = malloc(frame_sizes[i] + 1);
+        memcpy(original_frames[i], frames[i], frame_sizes[i]);
+        original_frames[i][frame_sizes[i]] = '\0';
+
+        if (flip) {
+            flipped_frames[i] = malloc(frame_sizes[i] + 1);
+            for (size_t j = 0; j < frame_sizes[i]; j++) {
+                flipped_frames[i][j] = frames[i][frame_sizes[i] - j - 1];
             }
-            file_count++;
+            flipped_frames[i][frame_sizes[i]] = '\0';
+        } else {
+            flipped_frames[i] = NULL;
         }
-    }
-    closedir(dp);
-
-    qsort(file_names, file_count, sizeof(char *), numeric_filename_comparator);
-
-    for (int i = 0; i < file_count; i++) {
-        char filepath[256];
-        snprintf(filepath, sizeof(filepath), "%s/%s", FRAMES_PATH, file_names[i]);
-        FILE *file = fopen(filepath, "r");
-        if (file) {
-            original_frames[frame_count] = malloc(MAX_FRAME_SIZE);
-            if (original_frames[frame_count] == NULL) {
-                perror("Error allocating memory for original frame");
-                fclose(file);
-                continue;
-            }
-            size_t read_size = fread(original_frames[frame_count], sizeof(char), MAX_FRAME_SIZE - 1, file);
-            original_frames[frame_count][read_size] = '\0';
-            fclose(file);
-
-            if (flip) {
-                size_t len = strlen(original_frames[frame_count]);
-                flipped_frames[frame_count] = malloc(len + 1);
-                if (flipped_frames[frame_count] == NULL) {
-                    perror("Error allocating memory for flipped frame");
-                    free(original_frames[frame_count]);
-                    continue;
-                }
-                for (size_t j = 0; j < len; j++) {
-                    flipped_frames[frame_count][j] = original_frames[frame_count][len - 1 - j];
-                }
-                flipped_frames[frame_count][len] = '\0';
-            }
-            frame_count++;
-        }
-        free(file_names[i]);
     }
 }
 
@@ -110,8 +80,8 @@ char **get_flipped_frames() {
     return flipped_frames;
 }
 
-int get_frame_count() {
-    return frame_count;
+int get_FRAME_COUNT() {
+    return FRAME_COUNT;
 }
 
 int select_color(int previous_color) {
@@ -131,7 +101,7 @@ void stream_frames(int flip) {
         int new_color = select_color(last_color);
         printf("%s%s\033[0m", COLORS[new_color], flip ? flipped_frames[index] : original_frames[index]);
         fflush(stdout);
-        index = (index + 1) % frame_count;
+        index = (index + 1) % FRAME_COUNT;
         last_color = new_color;
         usleep(FRAME_DELAY);
     }
