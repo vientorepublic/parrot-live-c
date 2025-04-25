@@ -31,20 +31,13 @@ int handle_error(const char *message, char **frames1, char **frames2) {
 }
 
 int main(int argc, char *argv[]) {
-    srand(time(NULL));
-
-    int flip = (argc > 1 && strcmp(argv[1], "flip") == 0) ? 1 : 0;
-
-    load_frames();
-
-    if (get_original_frames() == NULL || get_flipped_frames() == NULL || get_frame_count() == 0) {
-        return handle_error("Error: Failed to load frames.", get_original_frames(), get_flipped_frames());
+    int flip = 0;
+    if (argc > 1 && strcmp(argv[1], "flip") == 0) {
+        flip = 1;
     }
 
+    load_frames(flip);
     stream_frames(flip);
-
-    free_frames(get_original_frames(), get_frame_count());
-    free_frames(get_flipped_frames(), get_frame_count());
 
     return 0;
 }

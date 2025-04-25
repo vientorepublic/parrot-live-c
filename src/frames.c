@@ -27,7 +27,7 @@ int numeric_filename_comparator(const void *a, const void *b) {
     return num_a - num_b;
 }
 
-void load_frames() {
+void load_frames(int flip) {
     struct dirent *entry;
     DIR *dp = opendir(FRAMES_PATH);
     if (dp == NULL) {
@@ -36,11 +36,20 @@ void load_frames() {
     }
 
     original_frames = malloc(MAX_FRAMES * sizeof(char *));
-    flipped_frames = malloc(MAX_FRAMES * sizeof(char *));
-    if (original_frames == NULL || flipped_frames == NULL) {
-        perror("Error allocating memory for frame pointers");
+    if (original_frames == NULL) {
+        perror("Error allocating memory for original frame pointers");
         closedir(dp);
         return;
+    }
+
+    if (flip) {
+        flipped_frames = malloc(MAX_FRAMES * sizeof(char *));
+        if (flipped_frames == NULL) {
+            perror("Error allocating memory for flipped frame pointers");
+            free(original_frames);
+            closedir(dp);
+            return;
+        }
     }
 
     char *file_names[MAX_FRAMES];
@@ -74,17 +83,19 @@ void load_frames() {
             original_frames[frame_count][read_size] = '\0';
             fclose(file);
 
-            size_t len = strlen(original_frames[frame_count]);
-            flipped_frames[frame_count] = malloc(len + 1);
-            if (flipped_frames[frame_count] == NULL) {
-                perror("Error allocating memory for flipped frame");
-                free(original_frames[frame_count]);
-                continue;
+            if (flip) {
+                size_t len = strlen(original_frames[frame_count]);
+                flipped_frames[frame_count] = malloc(len + 1);
+                if (flipped_frames[frame_count] == NULL) {
+                    perror("Error allocating memory for flipped frame");
+                    free(original_frames[frame_count]);
+                    continue;
+                }
+                for (size_t j = 0; j < len; j++) {
+                    flipped_frames[frame_count][j] = original_frames[frame_count][len - 1 - j];
+                }
+                flipped_frames[frame_count][len] = '\0';
             }
-            for (size_t j = 0; j < len; j++) {
-                flipped_frames[frame_count][j] = original_frames[frame_count][len - 1 - j];
-            }
-            flipped_frames[frame_count][len] = '\0';
             frame_count++;
         }
         free(file_names[i]);

@@ -16,7 +16,7 @@ static char **original_frames;
 static char **flipped_frames;
 static int frame_count;
 
-void load_frames();
+void load_frames(int flip);
 int select_color(int previous_color);
 void stream_frames(int flip);
 
