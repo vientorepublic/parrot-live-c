@@ -23,4 +23,4 @@ char **get_original_frames();
 char **get_flipped_frames();
 int get_frame_count();
 
-#endif // FRAMES_H
+#endif  // FRAMES_H
